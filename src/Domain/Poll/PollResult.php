@@ -10,12 +10,12 @@ use Meals\Domain\Employee\Employee;
 class PollResult
 {
     public function __construct(
-        private int $id,
-        private Poll $poll,
-        private Employee $employee,
-        private Dish $dish,
-        private int $employeeFloor
-    ) {}
+        private int               $id,
+        private Poll              $poll,
+        private Employee          $employee,
+        private Dish              $dish
+    ) {
+    }
 
     public function getId(): int
     {
@@ -35,10 +35,5 @@ class PollResult
     public function getDish(): Dish
     {
         return $this->dish;
-    }
-
-    public function getEmployeeFloor(): int
-    {
-        return $this->employeeFloor;
     }
 }
