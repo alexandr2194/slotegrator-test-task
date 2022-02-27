@@ -7,7 +7,7 @@ namespace tests\Meals\Functional\Interactor;
 use DateTime;
 use DateTimeInterface;
 use Meals\Application\Component\Validator\Exception\AccessDeniedException;
-use Meals\Application\Component\Validator\Exception\EmployeeAlreadyHasFixedChoiceInActivePollOnDateException;
+use Meals\Application\Component\Validator\Exception\EmployeeAlreadyHasFixedChoiceInPollException;
 use Meals\Application\Component\Validator\Exception\PollDoesNotContainDishException;
 use Meals\Application\Component\Validator\Exception\PollIsNotActiveException;
 use Meals\Application\Component\Validator\Exception\WrongDateForFixChoiceInPollException;
@@ -42,75 +42,6 @@ class EmployeeFixesChoiceInActivePollTest extends FunctionalTestCase
         verify($pollResult->getDish())->equals($dish);
         verify($pollResult->getPoll())->equals($poll);
         verify($pollResult->getEmployee())->equals($employee);
-        verify($pollResult->getDateTime())->equals($date);
-    }
-
-    public function testPollIsNotActive(): void
-    {
-        $employee = $this->getEmployeeWithPermissions();
-        $poll = $this->getPollWithNotEmptyDishList(isActivePoll: false);
-        $dish = $this->getDish();
-        $date = $this->getCorrectDateTime();
-
-        $this->expectException(PollIsNotActiveException::class);
-
-        $this->performTestMethod($employee, $poll, $dish, $date);
-    }
-
-    public function testUserHasNotPermissions(): void
-    {
-        $employee = $this->getEmployeeWithNoPermissions();
-        $poll = $this->getPollWithNotEmptyDishList();
-        $dish = $this->getDish();
-        $date = $this->getCorrectDateTime();
-
-        $this->expectException(AccessDeniedException::class);
-
-        $this->performTestMethod($employee, $poll, $dish, $date);
-    }
-
-    public function testEmployeeAlreadyHasPollResultsInDay(): void
-    {
-        $this->expectException(EmployeeAlreadyHasFixedChoiceInActivePollOnDateException::class);
-
-        $employee = $this->getEmployeeWithPermissions();
-        $poll = $this->getPollWithNotEmptyDishList();
-        $dish = $this->getDish();
-        $date = $this->getCorrectDateTime();
-        $pollResult = $this->getPollResult($poll, $employee, $dish, $date);
-
-        $this->performTestMethod($employee, $poll, $dish, $date, $pollResult);
-    }
-
-    public function testEmployeeAlreadyHasPollResultsInAnotherPollInDay(): void
-    {
-        $this->expectException(EmployeeAlreadyHasFixedChoiceInActivePollOnDateException::class);
-
-        $employee = $this->getEmployeeWithPermissions();
-        $poll = $this->getPollWithNotEmptyDishList();
-        $dish = $this->getDish();
-        $date = $this->getCorrectDateTime();
-        $anotherPoll = $this->getPollWithNotEmptyDishList(2);
-        $pollResult = $this->getPollResult($anotherPoll, $employee, $dish, $date);
-
-        $this->performTestMethod($employee, $poll, $dish, $date, $pollResult);
-    }
-
-    public function testEmployeeAlreadyHasPollResultsInAnotherDay(): void
-    {
-        $employee = $this->getEmployeeWithPermissions();
-        $poll = $this->getPollWithNotEmptyDishList();
-        $dish = $this->getDish();
-        $date = $this->getCorrectDateTime();
-        $previousDate = $this->getCorrectDateTimeInPreviousPeriod();
-        $pollResult = $this->getPollResult($poll, $employee, $dish, $previousDate);
-
-        $actualPollResult = $this->performTestMethod($employee, $poll, $dish, $date, $pollResult);
-
-        verify($actualPollResult->getDish())->equals($dish);
-        verify($actualPollResult->getPoll())->equals($poll);
-        verify($actualPollResult->getEmployee())->equals($employee);
-        verify($actualPollResult->getDateTime())->equals($date);
     }
 
     public function testWrongDate(): void
@@ -137,6 +68,72 @@ class EmployeeFixesChoiceInActivePollTest extends FunctionalTestCase
         $this->performTestMethod($employee, $poll, $dish, $date);
     }
 
+    public function testPollIsNotActive(): void
+    {
+        $employee = $this->getEmployeeWithPermissions();
+        $poll = $this->getPollWithNotEmptyDishList(false);
+        $dish = $this->getDish();
+        $date = $this->getCorrectDateTime();
+
+        $this->expectException(PollIsNotActiveException::class);
+
+        $this->performTestMethod($employee, $poll, $dish, $date);
+    }
+
+    public function testUserHasNotPermissions(): void
+    {
+        $employee = $this->getEmployeeWithNoPermissions();
+        $poll = $this->getPollWithNotEmptyDishList();
+        $dish = $this->getDish();
+        $date = $this->getCorrectDateTime();
+
+        $this->expectException(AccessDeniedException::class);
+
+        $this->performTestMethod($employee, $poll, $dish, $date);
+    }
+
+    public function testEmployeeAlreadyHasPollResult(): void
+    {
+        $this->expectException(EmployeeAlreadyHasFixedChoiceInPollException::class);
+
+        $employee = $this->getEmployeeWithPermissions();
+        $poll = $this->getPollWithNotEmptyDishList();
+        $dish = $this->getDish();
+        $date = $this->getCorrectDateTime();
+        $pollResult = $this->getPollResult($poll, $employee, $dish);
+
+        $this->performTestMethod($employee, $poll, $dish, $date, $pollResult);
+    }
+
+    public function testEmployeeAlreadyHasPollResultsInAnotherDay(): void
+    {
+        $this->expectException(EmployeeAlreadyHasFixedChoiceInPollException::class);
+
+        $employee = $this->getEmployeeWithPermissions();
+        $poll = $this->getPollWithNotEmptyDishList();
+        $dish = $this->getDish();
+        $date = $this->getCorrectDateTime();
+        $pollResult = $this->getPollResult($poll, $employee, $dish);
+
+        $actualPollResult = $this->performTestMethod($employee, $poll, $dish, $date, $pollResult);
+
+        verify($actualPollResult->getDish())->equals($dish);
+        verify($actualPollResult->getPoll())->equals($poll);
+        verify($actualPollResult->getEmployee())->equals($employee);
+    }
+
+    public function testPollNotContainsDish(): void
+    {
+        $this->expectException(PollDoesNotContainDishException::class);
+
+        $employee = $this->getEmployeeWithPermissions();
+        $poll = $this->getPollWithEmptyDishList();
+        $dish = $this->getDish();
+        $date = $this->getCorrectDateTime();
+
+        $this->performTestMethod($employee, $poll, $dish, $date);
+    }
+
     private function performTestMethod(
         Employee          $employee,
         Poll              $poll,
@@ -158,18 +155,6 @@ class EmployeeFixesChoiceInActivePollTest extends FunctionalTestCase
             $poll->getId(),
             $dish->getId()
         );
-    }
-
-    public function testPollNotContainsDish(): void
-    {
-        $this->expectException(PollDoesNotContainDishException::class);
-
-        $employee = $this->getEmployeeWithPermissions();
-        $poll = $this->getPollWithEmptyDishList();
-        $dish = $this->getDish();
-        $date = $this->getCorrectDateTime();
-
-        $this->performTestMethod($employee, $poll, $dish, $date);
     }
 
     private function getEmployeeWithPermissions(): Employee
@@ -212,10 +197,10 @@ class EmployeeFixesChoiceInActivePollTest extends FunctionalTestCase
         );
     }
 
-    private function getPollWithNotEmptyDishList(int $id  = 1, bool $isActivePoll = true): Poll
+    private function getPollWithNotEmptyDishList(bool $isActivePoll = true): Poll
     {
         return new Poll(
-            $id,
+            1,
             $isActivePoll,
             new Menu(
                 1,
@@ -258,11 +243,6 @@ class EmployeeFixesChoiceInActivePollTest extends FunctionalTestCase
         return new DateTime('2022-02-21 10:00:00');
     }
 
-    private function getCorrectDateTimeInPreviousPeriod(): DateTimeInterface
-    {
-        return new DateTime('2022-02-14 10:00:00');
-    }
-
     private function getWrongDateTime(): DateTimeInterface
     {
         return new DateTime('2022-02-20 07:00:00');
@@ -273,14 +253,13 @@ class EmployeeFixesChoiceInActivePollTest extends FunctionalTestCase
         return new DateTime('2022-02-21 05:00:00');
     }
 
-    private function getPollResult(Poll $poll, Employee $employee, Dish $dish, DateTimeInterface $dateTime): PollResult
+    private function getPollResult(Poll $poll, Employee $employee, Dish $dish): PollResult
     {
         return new PollResult(
             1,
             $poll,
             $employee,
-            $dish,
-            $dateTime
+            $dish
         );
     }
 }

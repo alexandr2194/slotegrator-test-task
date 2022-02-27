@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Meals\Domain\Poll;
 
-use DateTimeInterface;
 use Meals\Domain\Dish\Dish;
 use Meals\Domain\Employee\Employee;
 
@@ -14,8 +13,7 @@ class PollResult
         private int               $id,
         private Poll              $poll,
         private Employee          $employee,
-        private Dish              $dish,
-        private DateTimeInterface $dateTime
+        private Dish              $dish
     ) {
     }
 
@@ -37,10 +35,5 @@ class PollResult
     public function getDish(): Dish
     {
         return $this->dish;
-    }
-
-    public function getDateTime(): DateTimeInterface
-    {
-        return $this->dateTime;
     }
 }
