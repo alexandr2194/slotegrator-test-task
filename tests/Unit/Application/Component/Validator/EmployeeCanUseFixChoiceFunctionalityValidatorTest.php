@@ -44,7 +44,8 @@ class EmployeeCanUseFixChoiceFunctionalityValidatorTest extends TestCase
         $validator->validate();
     }
 
-    private function prepareValidatorCase(DateTimeInterface $nowDateTime): EmployeeCanUseFixChoiceFunctionalityValidator {
+    private function prepareValidatorCase(DateTimeInterface $nowDateTime): EmployeeCanUseFixChoiceFunctionalityValidator
+    {
         $nowDateTimeProvider = $this->prophesize(NowDateTimeProviderInterface::class);
         $nowDateTimeProvider->getNowDate()->willReturn($nowDateTime);
 
