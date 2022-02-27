@@ -11,7 +11,7 @@ use Meals\Domain\Employee\Employee;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
-class UserHasNotFixedChoiceYetValidatorTest extends TestCase
+class EmployeeHasNotFixedChoiceYetValidatorTest extends TestCase
 {
     use ProphecyTrait;
 
