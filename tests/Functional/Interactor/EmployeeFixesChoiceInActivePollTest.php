@@ -115,11 +115,7 @@ class EmployeeFixesChoiceInActivePollTest extends FunctionalTestCase
         $date = $this->getCorrectDateTime();
         $pollResult = $this->getPollResult($poll, $employee, $dish);
 
-        $actualPollResult = $this->performTestMethod($employee, $poll, $dish, $date, $pollResult);
-
-        verify($actualPollResult->getDish())->equals($dish);
-        verify($actualPollResult->getPoll())->equals($poll);
-        verify($actualPollResult->getEmployee())->equals($employee);
+        $this->performTestMethod($employee, $poll, $dish, $date, $pollResult);
     }
 
     public function testPollNotContainsDish(): void
