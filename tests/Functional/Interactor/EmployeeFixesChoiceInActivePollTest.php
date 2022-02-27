@@ -70,24 +70,24 @@ class EmployeeFixesChoiceInActivePollTest extends FunctionalTestCase
 
     public function testPollIsNotActive(): void
     {
+        $this->expectException(PollIsNotActiveException::class);
+
         $employee = $this->getEmployeeWithPermissions();
         $poll = $this->getPollWithNotEmptyDishList(false);
         $dish = $this->getDish();
         $date = $this->getCorrectDateTime();
-
-        $this->expectException(PollIsNotActiveException::class);
 
         $this->performTestMethod($employee, $poll, $dish, $date);
     }
 
     public function testUserHasNotPermissions(): void
     {
+        $this->expectException(AccessDeniedException::class);
+
         $employee = $this->getEmployeeWithNoPermissions();
         $poll = $this->getPollWithNotEmptyDishList();
         $dish = $this->getDish();
         $date = $this->getCorrectDateTime();
-
-        $this->expectException(AccessDeniedException::class);
 
         $this->performTestMethod($employee, $poll, $dish, $date);
     }
